@@ -1,0 +1,74 @@
+/* app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --black: #0d0d0d;
+  --white: #f8f6f1;
+  --cream: #f2efe8;
+  --green: #1a3a2a;
+  --green-mid: #2d6147;
+  --green-light: #e8f0ec;
+  --green-accent: #4a8c68;
+  --border: rgba(26, 58, 42, 0.15);
+  --muted: rgba(26, 58, 42, 0.5);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  background: var(--cream);
+  color: var(--black);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  min-height: 100vh;
+}
+
+h1, h2, h3 {
+  font-family: 'Fraunces', Georgia, serif;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 0.5px solid var(--border);
+  border-radius: 3px;
+  background: var(--cream);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--black);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+input:focus {
+  border-color: var(--green-accent);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: var(--green);
+  color: var(--white);
+  border: none;
+  border-radius: 3px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--green-mid);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
