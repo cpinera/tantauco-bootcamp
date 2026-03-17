@@ -3,6 +3,48 @@ import { Resend } from "resend";
 import { BootcampEvent, EVENT_DETAILS } from "./types";
 
 function buildICS(event: BootcampEvent, attendeeName: string, attendeeEmail: string): string {
+    const dateMap: Record<string, string> = {
+          "19 de marzo": "20260319",
+          "31 de marzo": "20260331",
+          "2 de abril": "20260402",
+          "7 de abril": "20260407",
+          "9 de abril": "20260409",
+    };
+    const dateKey = Object.keys(dateMap).find((k) => event.date.toLowerCase().includes(k));
+    const dateStr = dateKey ? dateMap[dateKey] : "20260401";
+    const parts = event.time.split(/[–\-]/);
+    const startTime = parts[0].trim().replace(":", "") + "00";
+    const endTime = (parts[1] || "19:00").trim().replace(":", "") + "00";
+    const now = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    const uid = `tantauco-${event.id}-${Date.now()}@tantauco.vc`;
+    const allEmails = [attendeeEmail, ...EVENT_DETAILS.ccEmails];
+    const attendeeLines = allEmails
+      .map((e) => `ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=${e}:MAILTO:${e}`)
+      .join("\r\n");
+    return [
+          "BEGIN:VCALENDAR",
+          "VERSION:2.0",
+          "PRODID:-//Tantauco//AI Bootcamp//ES",
+          "METHOD:REQUEST",
+          "BEGIN:VEVENT",
+          `UID:${uid}`,
+          `DTSTAMP:${now}`,
+          `DTSTART:${dateStr}T${startTime}`,
+          `DTEND:${dateStr}T${endTime}`,
+          `SUMMARY:Tantauco AI Bootcamp \u2013 ${event.name}`,
+          `DESCRIPTION:${event.name} \u2013 ${event.date}\\, ${event.time} hrs\\nDirecci\u00f3n: ${EVENT_DETAILS.address}`,
+          `LOCATION:${EVENT_DETAILS.address}`,
+          `ORGANIZER;CN=Tantauco:MAILTO:${EVENT_DETAILS.ccEmails[0]}`,
+          attendeeLines,
+          "STATUS:CONFIRMED",
+          "END:VEVENT",
+          "END:VCALENDAR",
+        ].join("\r\n");
+}// lib/email.ts
+import { Resend } from "resend";
+import { BootcampEvent, EVENT_DETAILS } from "./types";
+
+function buildICS(event: BootcampEvent, attendeeName: string, attendeeEmail: string): string {
   const dateMap: Record<string, string> = {
           "31 de marzo": "20260331",
           "2 de abril": "20260402",
