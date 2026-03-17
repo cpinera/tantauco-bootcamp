@@ -11,7 +11,7 @@ function buildICS(event: BootcampEvent, attendeeName: string, attendeeEmail: str
   };
   const dateKey = Object.keys(dateMap).find((k) => event.date.includes(k));
   const dateStr = dateKey ? dateMap[dateKey] : "20250401";
-  const parts = event.time.split("–");
+  const parts = event.time.split(/[–\-]/)
   const startTime = parts[0].trim().replace(":", "") + "00";
   const endTime   = (parts[1] || "19:00").trim().replace(":", "") + "00";
   const now = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
