@@ -3,67 +3,24 @@ import { Resend } from "resend";
 import { BootcampEvent, EVENT_DETAILS } from "./types";
 
 function buildICS(event: BootcampEvent, attendeeName: string, attendeeEmail: string): string {
-    const dateMap: Record<string, string> = {
-          "19 de marzo": "20260319",
-          "31 de marzo": "20260331",
-          "2 de abril": "20260402",
-          "7 de abril": "20260407",
-          "9 de abril": "20260409",
-    };
-    const dateKey = Object.keys(dateMap).find((k) => event.date.toLowerCase().includes(k));
-    const dateStr = dateKey ? dateMap[dateKey] : "20260401";
-    const parts = event.time.split(/[–\-]/);
-    const startTime = parts[0].trim().replace(":", "") + "00";
-    const endTime = (parts[1] || "19:00").trim().replace(":", "") + "00";
-    const now = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-    const uid = `tantauco-${event.id}-${Date.now()}@tantauco.vc`;
-    const allEmails = [attendeeEmail, ...EVENT_DETAILS.ccEmails];
-    const attendeeLines = allEmails
-      .map((e) => `ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=${e}:MAILTO:${e}`)
-      .join("\r\n");
-    return [
-          "BEGIN:VCALENDAR",
-          "VERSION:2.0",
-          "PRODID:-//Tantauco//AI Bootcamp//ES",
-          "METHOD:REQUEST",
-          "BEGIN:VEVENT",
-          `UID:${uid}`,
-          `DTSTAMP:${now}`,
-          `DTSTART:${dateStr}T${startTime}`,
-          `DTEND:${dateStr}T${endTime}`,
-          `SUMMARY:Tantauco AI Bootcamp \u2013 ${event.name}`,
-          `DESCRIPTION:${event.name} \u2013 ${event.date}\\, ${event.time} hrs\\nDirecci\u00f3n: ${EVENT_DETAILS.address}`,
-          `LOCATION:${EVENT_DETAILS.address}`,
-          `ORGANIZER;CN=Tantauco:MAILTO:${EVENT_DETAILS.ccEmails[0]}`,
-          attendeeLines,
-          "STATUS:CONFIRMED",
-          "END:VEVENT",
-          "END:VCALENDAR",
-        ].join("\r\n");
-}// lib/email.ts
-import { Resend } from "resend";
-import { BootcampEvent, EVENT_DETAILS } from "./types";
-
-function buildICS(event: BootcampEvent, attendeeName: string, attendeeEmail: string): string {
   const dateMap: Record<string, string> = {
-          "31 de marzo": "20260331",
-          "2 de abril": "20260402",
-          "7 de abril": "20260407",
-          "9 de abril": "20260409",
+    "19 de marzo": "20260319",
+    "31 de marzo": "20260331",
+    "2 de abril": "20260402",
+    "7 de abril": "20260407",
+    "9 de abril": "20260409",
   };
-  const dateKey = Object.keys(dateMap).find((k) => event.date.includes(k));
-    const dateStr = dateKey ? dateMap[dateKey] : "20260401";
-  const parts = event.time.split(/[–\-]/)
+  const dateKey = Object.keys(dateMap).find((k) => event.date.toLowerCase().includes(k));
+  const dateStr = dateKey ? dateMap[dateKey] : "20260401";
+  const parts = event.time.split(/[–-]/);
   const startTime = parts[0].trim().replace(":", "") + "00";
-  const endTime   = (parts[1] || "19:00").trim().replace(":", "") + "00";
+  const endTime = (parts[1] || "19:00").trim().replace(":", "") + "00";
   const now = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
   const uid = `tantauco-${event.id}-${Date.now()}@tantauco.vc`;
-
   const allEmails = [attendeeEmail, ...EVENT_DETAILS.ccEmails];
-      
+  const attendeeLines = allEmails
     .map((e) => `ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=${e}:MAILTO:${e}`)
     .join("\r\n");
-
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -92,45 +49,44 @@ export async function sendInviteEmail(
 ) {
   const resend = new Resend(process.env.RESEND_API_KEY);
   const ics = buildICS(event, attendeeName, attendeeEmail);
-
   const html = `<!DOCTYPE html>
 <html lang="es">
 <head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f2efe8;font-family:Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;">
-  <tr><td align="center">
-    <table width="520" cellpadding="0" cellspacing="0" style="background:#f8f6f1;border-radius:6px;border:1px solid rgba(26,58,42,0.12);">
-      <tr><td style="background:#1a3a2a;padding:24px 32px;border-radius:6px 6px 0 0;">
-        <span style="color:#e8f0ec;font-size:16px;font-weight:400;letter-spacing:0.02em;">Tantauco</span>
-      </td></tr>
-      <tr><td style="padding:32px;">
-        <p style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#4a8c68;margin:0 0 12px;">Invitación confirmada</p>
-        <h1 style="font-size:24px;font-weight:400;color:#1a3a2a;margin:0 0 16px;">Tantauco AI Bootcamp</h1>
-        <p style="font-size:14px;color:#555;line-height:1.7;margin:0 0 24px;">
-          Hola <strong>${attendeeName}</strong>,<br>
-          Tu inscripción está confirmada. Te esperamos en:
-        </p>
-        <table width="100%" cellpadding="0" cellspacing="0" style="background:#e8f0ec;border-radius:4px;margin-bottom:24px;">
-          <tr><td style="padding:18px 22px;">
-            <p style="margin:0 0 4px;font-size:16px;color:#1a3a2a;font-weight:500;">${event.name} — ${event.date}</p>
-            <p style="margin:0 0 10px;font-size:13px;color:#5a7a6a;">${event.time} hrs</p>
-            <p style="margin:0;font-size:13px;color:#1a3a2a;">📍 ${EVENT_DETAILS.address}</p>
-          </td></tr>
-        </table>
-        <p style="font-size:13px;color:#777;line-height:1.8;margin:0 0 20px;">
-          Adjuntamos una invitación de calendario para que la agregues a tu agenda.<br>
-          Cualquier consulta, responde este email.
-        </p>
-        <p style="font-size:13px;color:#555;margin:0;">
-          Nos vemos pronto,<br>
-          <strong style="color:#1a3a2a;">Equipo Tantauco</strong>
-        </p>
-      </td></tr>
-      <tr><td style="border-top:1px solid rgba(26,58,42,0.1);padding:14px 32px;">
-        <p style="margin:0;font-size:11px;color:#aaa;">© ${new Date().getFullYear()} Tantauco · tantauco.vc</p>
-      </td></tr>
-    </table>
-  </td></tr>
+<tr><td align="center">
+<table width="520" cellpadding="0" cellspacing="0" style="background:#f8f6f1;border-radius:6px;border:1px solid rgba(26,58,42,0.12);">
+<tr><td style="background:#1a3a2a;padding:24px 32px;border-radius:6px 6px 0 0;">
+<span style="color:#e8f0ec;font-size:16px;font-weight:400;letter-spacing:0.02em;">Tantauco</span>
+</td></tr>
+<tr><td style="padding:32px;">
+<p style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#4a8c68;margin:0 0 12px;">Invitación confirmada</p>
+<h1 style="font-size:24px;font-weight:400;color:#1a3a2a;margin:0 0 16px;">Tantauco AI Bootcamp</h1>
+<p style="font-size:14px;color:#555;line-height:1.7;margin:0 0 24px;">
+Hola <strong>${attendeeName}</strong>,<br>
+Tu inscripción está confirmada. Te esperamos en:
+</p>
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#e8f0ec;border-radius:4px;margin-bottom:24px;">
+<tr><td style="padding:18px 22px;">
+<p style="margin:0 0 4px;font-size:16px;color:#1a3a2a;font-weight:500;">${event.name} — ${event.date}</p>
+<p style="margin:0 0 10px;font-size:13px;color:#5a7a6a;">${event.time} hrs</p>
+<p style="margin:0;font-size:13px;color:#1a3a2a;">📍 ${EVENT_DETAILS.address}</p>
+</td></tr>
+</table>
+<p style="font-size:13px;color:#777;line-height:1.8;margin:0 0 20px;">
+Adjuntamos una invitación de calendario para que la agregues a tu agenda.<br>
+Cualquier consulta, responde este email.
+</p>
+<p style="font-size:13px;color:#555;margin:0;">
+Nos vemos pronto,<br>
+<strong style="color:#1a3a2a;">Equipo Tantauco</strong>
+</p>
+</td></tr>
+<tr><td style="border-top:1px solid rgba(26,58,42,0.1);padding:14px 32px;">
+<p style="margin:0;font-size:11px;color:#aaa;">© ${new Date().getFullYear()} Tantauco · tantauco.vc</p>
+</td></tr>
+</table>
+</td></tr>
 </table>
 </body>
 </html>`;
