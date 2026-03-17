@@ -24,5 +24,5 @@ export const DEFAULT_EVENTS: BootcampEvent[] = [
 export const EVENT_DETAILS = {
   title: "Tantauco AI Bootcamp",
   address: "Av. Santa María 5870, Oficina 46, Vitacura",
-  ccEmails: ["Cristobal@tantauco.vc", "juan@tantauco.vc"],
+  ccEmails: ["Cristobal@tantauco.vc"],
 };
