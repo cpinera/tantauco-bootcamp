@@ -4,13 +4,13 @@ import { BootcampEvent, EVENT_DETAILS } from "./types";
 
 function buildICS(event: BootcampEvent, attendeeName: string, attendeeEmail: string): string {
   const dateMap: Record<string, string> = {
-    "31 de marzo": "20250331",
-    "2 de abril":  "20250402",
-    "7 de abril":  "20250407",
-    "9 de abril":  "20250409",
+          "31 de marzo": "20260331",
+          "2 de abril": "20260402",
+          "7 de abril": "20260407",
+          "9 de abril": "20260409",
   };
   const dateKey = Object.keys(dateMap).find((k) => event.date.includes(k));
-  const dateStr = dateKey ? dateMap[dateKey] : "20250401";
+    const dateStr = dateKey ? dateMap[dateKey] : "20260401";
   const parts = event.time.split(/[–\-]/)
   const startTime = parts[0].trim().replace(":", "") + "00";
   const endTime   = (parts[1] || "19:00").trim().replace(":", "") + "00";
@@ -18,7 +18,7 @@ function buildICS(event: BootcampEvent, attendeeName: string, attendeeEmail: str
   const uid = `tantauco-${event.id}-${Date.now()}@tantauco.vc`;
 
   const allEmails = [attendeeEmail, ...EVENT_DETAILS.ccEmails];
-  const attendeeLines = allEmails
+      
     .map((e) => `ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=${e}:MAILTO:${e}`)
     .join("\r\n");
 
